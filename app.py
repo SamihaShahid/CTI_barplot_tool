@@ -211,4 +211,4 @@ def home():
     return render_template("index.html", pollutants=pollutants, selected_pollutant=selected_pollutant, plot_img=plot_img)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=8080, debug=True)
