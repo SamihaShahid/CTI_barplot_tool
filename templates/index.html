@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CTI Barplot Tool</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+        .container {
+            max-width: 1000px; /* Increased container width */
+            margin: auto;
+        }
+        h1 {
+            font-size: 20px; /* Reduced title size */
+            font-weight: bold;
+        }
+        img {
+            width: 100%;
+            max-width: 900px; /* Increased image size */
+            height: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-top: 20px;
+        }
+        .form-group {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .dropdown-container {
+            position: relative;
+            width: 250px;
+        }
+        .search-box {
+            width: 100%;
+            padding: 8px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            width: 100%;
+            max-height: 200px;
+            overflow-y: auto;
+            background-color: white;
+            border: 1px solid #ccc;
+            z-index: 1000;
+        }
+        .dropdown-content div {
+            padding: 8px;
+            cursor: pointer;
+        }
+        .dropdown-content div:hover {
+            background-color: #f1f1f1;
+        }
+        .select-box {
+            width: 250px;
+            padding: 8px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+        label {
+            font-size: 16px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CTI Barplot Tool: Toxic Pollutant & Weighted Emissions</h1>
+        <form method="POST">
+            <div class="form-group">
+                <label for="pollutant">Select Pollutant:</label>
+                
+                <div class="dropdown-container">
+                    <input type="text" id="searchPollutant" class="search-box" placeholder="Search pollutant..." onkeyup="filterDropdown()" onclick="toggleDropdown()">
+                    <div class="dropdown-content" id="dropdownList">
+                        {% for pol in pollutants %}
+                            <div onclick="selectPollutant('{{ pol }}')">{{ pol }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <select id="pollutantDropdown" class="select-box" onchange="selectFromDropdown()">
+                    <option value="" disabled selected>Choose a pollutant</option>
+                    {% for pol in pollutants %}
+                        <option value="{{ pol }}">{{ pol }}</option>
+                    {% endfor %}
+                </select>
+                
+                <input type="hidden" name="pollutant" id="selectedPollutant" value="{{ selected_pollutant }}">
+            </div>
+        </form>
+
+        <img src="data:image/png;base64,{{ plot_img }}" alt="Emissions Bar Plot">
+    </div>
+
+    <script>
+        function toggleDropdown() {
+            document.getElementById("dropdownList").style.display = "block";
+        }
+
+        document.addEventListener("click", function (event) {
+            if (!event.target.closest(".dropdown-container")) {
+                document.getElementById("dropdownList").style.display = "none";
+            }
+        });
+
+        function filterDropdown() {
+            let input = document.getElementById("searchPollutant");
+            let filter = input.value.toUpperCase();
+            let divs = document.getElementById("dropdownList").getElementsByTagName("div");
+
+            for (let i = 0; i < divs.length; i++) {
+                if (divs[i].innerHTML.toUpperCase().indexOf(filter) > -1) {
+                    divs[i].style.display = "";
+                } else {
+                    divs[i].style.display = "none";
+                }
+            }
+        }
+
+        function selectPollutant(value) {
+            document.getElementById("selectedPollutant").value = value;
+            document.getElementById("searchPollutant").value = value;
+            document.getElementById("dropdownList").style.display = "none";
+            document.querySelector("form").submit();
+        }
+
+        function selectFromDropdown() {
+            let dropdown = document.getElementById("pollutantDropdown");
+            let selectedValue = dropdown.value;
+            document.getElementById("selectedPollutant").value = selectedValue;
+            document.getElementById("searchPollutant").value = selectedValue;
+            document.querySelector("form").submit();
+        }
+    </script>
+</body>
+</html>
