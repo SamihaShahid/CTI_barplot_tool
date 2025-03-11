@@ -4,5 +4,6 @@ numpy
 matplotlib
 seaborn
 openpyxl
-
+requests
+gunicorn  # Required for deployment
 
