@@ -39,59 +39,10 @@ def load_excel_from_github(filename):
         return pd.DataFrame()  # Return an empty DataFrame if loading fails
 
 # Load emissions and health data from GitHub
-mm1 = load_excel_from_github("processed_ems_2020_rpt_grp.xlsx")
-mm2 = load_excel_from_github("processed_ems_2010.xlsx")
-mm3 = load_excel_from_github("processed_ems_2008.xlsx")
-hh = load_data_from_github("MASTER_HEALTH_202503100840.csv")
-
-#_____
-hh = hh[['POL', 'InhalationCancerURF', 'InhalationChronicREL', 'AcuteREL', 'MolWtCorrection']]
-hh = hh.rename(columns={'POL': 'pol'})
-
-# Merge emission datasets
-mm1 = mm1.merge(mm2[['SP_10', 'SA_10', 'A_10', 'M_10', 'O_10', 'N_10', 'pol']], on='pol', how='left')
-
-# Aggregate emissions from 2008
-mm3['M_08'] = mm3['MG_08'] + mm3['MD_08'] + mm3["MO_08"]
-mm3['O_08'] = mm3['OD_08'] + mm3['OG_08']
-
-mm1 = mm1.merge(mm3[['SP_08', 'SA_08', 'A_08', 'M_08', 'O_08', 'N_08', 'poln']], on='poln', how='left')
-mm1 = mm1.merge(hh, on='pol', how='left')
-
-# Define emission source columns
-ems_col = ['SP', 'SA', 'O', 'M', 'N', 'A', 
-           'SP_10', 'SA_10', 'A_10', 'M_10', 'O_10', 'N_10', 
-           'SP_08', 'SA_08', 'A_08', 'M_08', 'O_08', 'N_08']
-
-# Handle zero values in health factors to avoid division errors
-mm1[['InhalationCancerURF', 'MolWtCorrection']] = mm1[['InhalationCancerURF', 'MolWtCorrection']].replace(0, np.nan)
-
-# Compute Cancer Toxic-Weighted Emissions (TWE)
-mm1_cancer_twe = mm1.copy()
-mm1_cancer_twe[ems_col] = mm1[ems_col].mul(
-    mm1['InhalationCancerURF'] * mm1['MolWtCorrection'] * 7700, axis=0
-)
-
-# Compute Chonic Toxic-Weighted Emissions (TWE)
-# Make a copy of mm1 to store chronic toxic-weighted emissions
-mm1_chronic_twe = mm1.copy()
-# Handle zero values in "InhalationChronicREL" to prevent division errors
-mm1_chronic_twe['InhalationChronicREL'] = mm1_chronic_twe['InhalationChronicREL'].replace(0, np.nan)
-# Compute Chronic Toxic-Weighted Emissions (CHRONIC_TWE)
-mm1_chronic_twe[ems_col] = mm1[ems_col].mul(
-    (1 / 8760) * (1 / mm1['InhalationChronicREL']) * 150, axis=0
-)
-
-# Compute Chonic Toxic-Weighted Emissions (TWE)
-# Make a copy of mm1 to store acute toxic-weighted emissions
-mm1_acute_twe = mm1.copy()
-# Handle zero values in "AcuteREL" to prevent division errors
-mm1_acute_twe['AcuteREL'] = mm1_acute_twe['AcuteREL'].replace(0, np.nan)
-# Compute Acute Toxic-Weighted Emissions (ACUTE_TWE)
-mm1_acute_twe[ems_col] = mm1[ems_col].mul(
-    (1 / 8760) * (1 / mm1['AcuteREL']) * 1500, axis=0
-)
-
+mm1 = load_excel_from_github("merged_data.xlsx")
+mm1_cancer_twe = load_excel_from_github("mm1_cancer_twe.xlsx")
+mm1_chronic_twe = load_excel_from_github("mm1_chronic_twe.xlsx")
+mm1_acute_twe = load_excel_from_github("mm1_acute_twe.xlsx")
 
 # Define source categories
 x_label = ['Stationary\nPoint', 'Stationary\nAggregate', 'Areawide', 'Onroad\nMobile', 'Other\nOnroad', 'Natural']
