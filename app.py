@@ -50,7 +50,7 @@ x_label = ['Stationary\nPoint', 'Stationary\nAggregate', 'Areawide', 'Onroad\nMo
 # Get unique pollutants
 pollutants = mm1['poln'].dropna().unique()
 
-def generate_plot(selected_pollutant):
+def generate_plot(selected_pollutant,mm1,mm1_cancer_twe,mm1_chronic_twe,mm1_acute_twe):
     """Generate a 2x2 grid of subplots for:
        1. Emissions,
        2. Cancer Toxic-Weighted Emissions (TWE),
@@ -146,7 +146,7 @@ def generate_plot(selected_pollutant):
 
     # Save the figure to a BytesIO object
     img = io.BytesIO()
-    plt.savefig(img, format='png', bbox_inches='tight')
+    #plt.savefig(img, format='png', bbox_inches='tight')
     img.seek(0)
     plt.close()
 
@@ -157,9 +157,9 @@ def generate_plot(selected_pollutant):
 @app.route("/", methods=["GET", "POST"])
 def home():
     selected_pollutant = request.form.get("pollutant", pollutants[0])
-    plot_img = generate_plot(selected_pollutant)
+    plot_img = generate_plot(selected_pollutant,mm1,mm1_cancer_twe,mm1_chronic_twe,mm1_acute_twe)
     
     return render_template("index.html", pollutants=pollutants, selected_pollutant=selected_pollutant, plot_img=plot_img)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080, debug=True)
+    app.run(port=5001, debug=True)
