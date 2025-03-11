@@ -7,15 +7,44 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import io
 import base64
+import requests
+from io import StringIO, BytesIO
+
 
 app = Flask(__name__)
 
-# Load emissions and health data
-mm1 = pd.read_excel('/Users/samiha/Desktop/EMS_2010_2020/CTI_barplot_tool/data/processed_ems_2020_rpt_grp.xlsx')
-mm2 = pd.read_excel('/Users/samiha/Desktop/EMS_2010_2020/CTI_barplot_tool/data/processed_ems_2010.xlsx')
-mm3 = pd.read_excel('/Users/samiha/Desktop/EMS_2010_2020/CTI_barplot_tool/data/processed_ems_2008.xlsx')
+# GitHub Raw Data Base URL
+GITHUB_BASE_URL = "https://raw.githubusercontent.com/SamihaShahid/CTI_barplot_tool/main/data/"
 
-hh = pd.read_csv('/Users/samiha/Desktop/EMS_2010_2020/CTI_barplot_tool/data/MASTER_HEALTH_202503100840.csv')
+# Function to load CSV files from GitHub
+def load_data_from_github(filename):
+    url = GITHUB_BASE_URL + filename
+    try:
+        response = requests.get(url)
+        response.raise_for_status()  # Raise an error for bad response (e.g., 404)
+        return pd.read_csv(StringIO(response.text))
+    except requests.exceptions.RequestException as e:
+        print(f"Error loading {filename}: {e}")
+        return pd.DataFrame()  # Return an empty DataFrame if loading fails
+
+# Function to load Excel files from GitHub
+def load_excel_from_github(filename):
+    url = GITHUB_BASE_URL + filename
+    try:
+        response = requests.get(url)
+        response.raise_for_status()  # Raise an error for bad response (e.g., 404)
+        return pd.read_excel(BytesIO(response.content), sheet_name="Sheet1")
+    except requests.exceptions.RequestException as e:
+        print(f"Error loading {filename}: {e}")
+        return pd.DataFrame()  # Return an empty DataFrame if loading fails
+
+# Load emissions and health data from GitHub
+mm1 = load_excel_from_github("processed_ems_2020_rpt_grp.xlsx")
+mm2 = load_excel_from_github("processed_ems_2010.xlsx")
+mm3 = load_excel_from_github("processed_ems_2008.xlsx")
+hh = load_data_from_github("MASTER_HEALTH_202503100840.csv")
+
+#_____
 hh = hh[['POL', 'InhalationCancerURF', 'InhalationChronicREL', 'AcuteREL', 'MolWtCorrection']]
 hh = hh.rename(columns={'POL': 'pol'})
 
