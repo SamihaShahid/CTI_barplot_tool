@@ -146,7 +146,7 @@ def generate_plot(selected_pollutant,mm1,mm1_cancer_twe,mm1_chronic_twe,mm1_acut
 
     # Save the figure to a BytesIO object
     img = io.BytesIO()
-    #plt.savefig(img, format='png', bbox_inches='tight')
+    plt.savefig(img, format='png', bbox_inches='tight')
     img.seek(0)
     plt.close()
 
